@@ -1,25 +1,20 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Route, Switch, HashRouter } from "react-router-dom";
+import RandomPuzzle from './pages/RandomPuzzle'
+import CreatePuzzle from './pages/CreatePuzzle'
+import SolvePuzzle from './pages/SolvePuzzle'
+import HighScore from './pages/HighScore'
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <HashRouter basename='/crossword_app'>
+        <Switch>
+          <Route exact path="/" component={RandomPuzzle} />
+          <Route exact path="/CreatePuzzle" component={CreatePuzzle} />
+          <Route exact path="/SolvePuzzle" component={SolvePuzzle} />
+          <Route exact path="/HighScore" component={HighScore} />
+        </Switch>
+    </HashRouter>
   );
 }
 
