@@ -1,12 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
-import NavBar from '../../components/Nav';
-import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Button } from 'reactstrap';
+import React, { useState, useRef, useEffect } from 'react'
+import NavBar from '../../components/Nav'
+import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Button } from 'reactstrap'
+import QuestionForm from '../../components/Forms/QuestionForm'
+import BylineForm from '../../components/Forms/BylineForm'
 
 const CreatePuzzle = (props) => {
-    const [gridNum, setGridNum] = useState([]);
-    const [gridComplete, setGridComplete] = useState(false);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [block, setBlock] = useState(false);
+    const [gridNum, setGridNum] = useState([])
+    const [gridComplete, setGridComplete] = useState(false)
+    const [dropdownOpen, setDropdownOpen] = useState(false)
+    const [questions, setQuestions] = useState(false)
+    const [byline, setByline] = useState(false)
+    const [block, setBlock] = useState(false)
     const puzzleContainer = useRef(null)
     const toggle = () => setDropdownOpen(prevState => !prevState);
     let wordArray = []
@@ -18,7 +22,7 @@ const CreatePuzzle = (props) => {
         var gridStyle={
             gridboxes: {
                 display:'flex',
-                flexGrow: 2,
+                flexGrow: 3,
                 border:'1px solid black',
                 backgroundColor: 'white',
                 fontSize: '70%',
@@ -30,23 +34,34 @@ const CreatePuzzle = (props) => {
         else if(gridNum.length == 36) gridStyle.gridboxes.width = 500 / 6 - 1 + 'px'
         else if(gridNum.length == 64) gridStyle.gridboxes.width = 500 / 8 - 1 + 'px'
         else if(gridNum.length == 100) gridStyle.gridboxes.width = 500 / 10 - 1 + 'px'
+        else if(gridNum.length == 225) gridStyle.gridboxes.width = 500 / 15 - 1 + 'px'
         else if(gridNum.length == 0 || 1) gridStyle.gridboxes.width = '499px'
 
-        return gridNum.map(grids=> (<input key={grids} 
-        onMouseOver={(here)=> { !block ?
-        here.currentTarget.style.border = '10px inset #5bc0de' :
-        here.currentTarget.style.border = '10px inset #292b2c'}}
-        onMouseOut={(here)=> {
-            !block ? here.currentTarget.style.border = '1px solid black' :
-            here.currentTarget.style.border = '1px solid black'
-            }}
-        datatype={grids} style={gridStyle.gridboxes} placeholder={grids}
-        onChange={handleChange}
-        onClick={(a)=> {
-            block ? a.target.style.backgroundColor = '#292b2c' : 
-            a.target.style.backgroundColor = 'white'}}
-        maxLength="1"
-        />))
+        return gridNum.map(grids=> (
+            <input key={grids} maxLength="1" datatype={grids} style={gridStyle.gridboxes} placeholder={grids}
+                onChange={handleChange} className='gridboxes text-center'
+
+                onMouseOver={(here)=> { !block ?
+                    here.currentTarget.style.border = '10px inset #5bc0de' :
+                    here.currentTarget.style.border = '10px inset #292b2c'
+                }}
+
+                onMouseOut={(here)=> {
+                    !block ? here.currentTarget.style.border = '1px solid black' :
+                    here.currentTarget.style.border = '1px solid black'
+                }}
+                    
+                onClick={(a)=> {
+                    if(block) {
+                        a.target.style.backgroundColor = '#292b2c'
+                        a.target.datatype = null 
+                    } 
+                    else if(!block){
+                        a.target.style.backgroundColor = 'white'
+                        a.target.datatype = 1
+                    }
+                }}
+            />))
     }
 
     const pickGridNumber = (num) => {
@@ -72,6 +87,20 @@ const CreatePuzzle = (props) => {
         console.log(e.target.value)
         console.log(e.target)
     }
+    const autoBlock = () => {
+        Array.from(document.getElementsByClassName('gridboxes'))
+        .forEach(element => {
+            if(!element.datatype){
+                element.style.backgroundColor = '#292b2c'
+            }
+        })
+    }
+    // highlightAcross and highlightDown are callbacks to hightlight question area
+    // use "placeholder" of cell for logic
+    const questionMode = (highlightAcross, highlightDown) => {
+        setQuestions(!questions)
+
+    }
         return (
             <div>
                 <NavBar />
@@ -82,23 +111,30 @@ const CreatePuzzle = (props) => {
                         </div>
                     </div>
                     <div style={{display:'flex',flexDirection:'column'}}>
-                    <Dropdown isOpen={dropdownOpen} toggle={toggle}>
+                    <Dropdown isOpen={dropdownOpen} toggle={toggle} className='mb-3 ml-3'>
                       <DropdownToggle caret>
                       Number of Rows and Column
                         </DropdownToggle>
                       <DropdownMenu>
                         <DropdownItem header>Grids</DropdownItem>
-                        <DropdownItem onClick={()=>pickGridNumber(4)}>4</DropdownItem>
-                        <DropdownItem onClick={()=>pickGridNumber(6)}>6</DropdownItem>
-                        <DropdownItem onClick={()=>pickGridNumber(8)}>8</DropdownItem>
-                        <DropdownItem onClick={()=>pickGridNumber(10)}>10</DropdownItem>
+                        <DropdownItem onClick={()=>pickGridNumber(4)}>4 x 4</DropdownItem>
+                        <DropdownItem onClick={()=>pickGridNumber(6)}>6 x 6</DropdownItem>
+                        <DropdownItem onClick={()=>pickGridNumber(8)}>8 x 8</DropdownItem>
+                        <DropdownItem onClick={()=>pickGridNumber(10)}>10 x 10</DropdownItem>
+                        <DropdownItem onClick={()=>pickGridNumber(15)}>15 x 15</DropdownItem>
                       </DropdownMenu>
                     </Dropdown>
-                    <Button color="dark" onClick={()=> setBlock(!block)}>{!block ? 'BLOCK' : 'UNBLOCK'}</Button>
+                    <Button className='mb-3 ml-3' color="dark" onClick={()=> setBlock(!block)}>{!block ? 'BLOCK' : 'UNBLOCK'}</Button>
+                    <Button className='mb-3 ml-3' color="dark" onClick={()=> autoBlock()}>Auto-Block</Button>
+                    <Button className='mb-3 ml-3' color="info" onClick={()=> questionMode()}>Questions</Button>
+                    <Button className='mb-3 ml-3' color="success" onClick={()=> setByline(!byline)}>Byine</Button>
+                    <Button className='mb-3 ml-3' color="primary" onClick={()=> console.log('Submit to database')}>Submit</Button>
                     </div>
+                        {questions ? <QuestionForm /> : null}
+                        {byline ? <BylineForm /> : null}
                 </div>
             </div>
-        );
+        )
 }
 
 const styles = {
